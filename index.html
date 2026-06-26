@@ -170,6 +170,34 @@
       color: var(--accent2);
       font-weight: 600;
     }
+
+    .marketplace-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding: 8px 24px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+    .marketplace-tab {
+      padding: 4px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--ink-mid);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s, border-color 0.12s;
+      font-family: inherit;
+    }
+    .marketplace-tab:hover { background: var(--border); color: var(--ink); }
+    .marketplace-tab.active {
+      background: var(--accent2);
+      border-color: var(--accent2);
+      color: #fff;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -184,6 +212,7 @@
 </header>
 
 <div id="monthTabs" class="month-tabs" style="display:none;"></div>
+<div id="marketplaceTabs" class="marketplace-tabs" style="display:none;"></div>
 
 <main class="container">
   <div class="loading-state" id="loadingState">
@@ -303,6 +332,9 @@
     supabaseUrl: 'https://wxqqmflqwnohsxpbonpw.supabase.co',
     supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4cXFtZmxxd25vaHN4cGJvbnB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4OTM1ODgsImV4cCI6MjA5NzQ2OTU4OH0.WC4EXYyWPBllWGSXUKGtL7nBMUg9Qi-zHqYDJbfmx6U',
   };
+
+  let currentMes = null;
+  let currentMarketplace = null;
 
   const fmt = (n,d=0) => new Intl.NumberFormat('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d}).format(n||0);
   const fmtEur = n => new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n||0);
@@ -426,25 +458,69 @@
         btn.addEventListener('click', async function() {
           tabsEl.querySelectorAll('.month-tab').forEach(function(b) { b.classList.remove('active'); });
           this.classList.add('active');
-          await loadMes(this.dataset.mes);
+          currentMarketplace = null;
+          await loadMes(this.dataset.mes, null);
         });
         tabsEl.appendChild(btn);
       });
 
-      await loadMes(allMeses[0]);
+      await loadMes(allMeses[0], null);
     } catch(e) {
       document.getElementById('loadingState').innerHTML = `<p style="color:var(--negative);">${e.message}</p>`;
     }
   }
 
-  async function loadMes(mes) {
+  function renderMarketplaceTabs(marketplaces, activeMkt) {
+    const tabsEl = document.getElementById('marketplaceTabs');
+    if (marketplaces.length <= 1) {
+      tabsEl.style.display = 'none';
+      tabsEl.innerHTML = '';
+      return;
+    }
+    tabsEl.style.display = 'flex';
+    tabsEl.innerHTML = '';
+
+    const allBtn = document.createElement('button');
+    allBtn.className = 'marketplace-tab' + (!activeMkt ? ' active' : '');
+    allBtn.textContent = 'Todos';
+    allBtn.addEventListener('click', async function() {
+      tabsEl.querySelectorAll('.marketplace-tab').forEach(function(b) { b.classList.remove('active'); });
+      this.classList.add('active');
+      await loadMes(currentMes, null);
+    });
+    tabsEl.appendChild(allBtn);
+
+    marketplaces.forEach(function(mkt) {
+      const btn = document.createElement('button');
+      btn.className = 'marketplace-tab' + (activeMkt === mkt ? ' active' : '');
+      btn.textContent = mkt;
+      btn.addEventListener('click', async function() {
+        tabsEl.querySelectorAll('.marketplace-tab').forEach(function(b) { b.classList.remove('active'); });
+        this.classList.add('active');
+        await loadMes(currentMes, mkt);
+      });
+      tabsEl.appendChild(btn);
+    });
+  }
+
+  async function loadMes(mes, marketplace) {
+    currentMes = mes;
+    currentMarketplace = marketplace || null;
     document.getElementById('loadingState').style.display = 'flex';
     document.getElementById('content').style.display = 'none';
     try {
-      const [productos, campanas] = await Promise.all([
-        sbFetch('productos', {select:'*', cliente_id:`eq.${CONFIG.clienteId}`, mes:`eq.${mes}`, order:'ventas_totales.desc'}),
+      const prodParams = {select:'*', cliente_id:`eq.${CONFIG.clienteId}`, mes:`eq.${mes}`, order:'ventas_totales.desc'};
+      if (currentMarketplace) prodParams.marketplace = `eq.${currentMarketplace}`;
+
+      const [productos, campanas, mktRows] = await Promise.all([
+        sbFetch('productos', prodParams),
         sbFetch('campanas',  {select:'*', cliente_id:`eq.${CONFIG.clienteId}`, mes:`eq.${mes}`, order:'gasto.desc'}),
+        sbFetch('productos', {select:'marketplace', cliente_id:`eq.${CONFIG.clienteId}`, mes:`eq.${mes}`}),
       ]);
+
+      const marketplaces = [...new Set(mktRows.map(function(r) { return r.marketplace; }).filter(function(m) { return m && m !== ''; }))].sort();
+      renderMarketplaceTabs(marketplaces, currentMarketplace);
+
       render(productos, campanas, mes);
     } catch(e) {
       document.getElementById('loadingState').innerHTML = `<p style="color:var(--negative);">${e.message}</p>`;
@@ -454,7 +530,7 @@
 
   function render(productos,campanas,mes) {
     document.getElementById('headerClientName').textContent=CONFIG.clienteNombre;
-    document.getElementById('headerPeriod').textContent=fmtMes(mes);
+    document.getElementById('headerPeriod').textContent=fmtMes(mes) + (currentMarketplace ? ' · ' + currentMarketplace : '');
     document.title=`${CONFIG.clienteNombre} — Grow Studio`;
 
     // Agrupar por similitud de título (primeras 8 palabras) para consolidar variantes
