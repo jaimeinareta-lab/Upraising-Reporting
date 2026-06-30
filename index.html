@@ -171,6 +171,35 @@
       font-weight: 600;
     }
 
+    /* EDITOR MANUAL DE CAMPAÑAS */
+    .camp-editor-wrap { border: 1px dashed var(--accent2); border-radius: var(--radius); padding: 16px; background: rgba(26,86,219,0.03); }
+    .camp-editor-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .camp-editor-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent2); background: rgba(26,86,219,0.1); padding: 2px 8px; border-radius: 4px; }
+    .camp-editor-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+    .camp-editor-table th { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-light); padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+    .camp-editor-table td { padding: 6px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .camp-editor-table tr:last-child td { border-bottom: none; }
+    .camp-editor-table input[type=text], .camp-editor-table input[type=number] {
+      width: 100%; font-size: 13px; font-family: inherit; border: 1px solid var(--border);
+      border-radius: 4px; padding: 5px 8px; background: var(--surface); color: var(--ink);
+      outline: none; transition: border-color 0.15s;
+    }
+    .camp-editor-table input:focus { border-color: var(--accent2); box-shadow: 0 0 0 2px rgba(26,86,219,0.12); }
+    .camp-editor-table .td-calc { font-size: 12px; font-weight: 600; text-align: right; padding-right: 10px; font-variant-numeric: tabular-nums; }
+    .camp-editor-table .td-del { width: 32px; text-align: center; }
+    .btn-del-row { background: none; border: none; cursor: pointer; color: var(--ink-light); font-size: 16px; line-height: 1; padding: 2px 4px; border-radius: 3px; transition: color 0.1s, background 0.1s; }
+    .btn-del-row:hover { color: var(--negative); background: rgba(220,38,38,0.08); }
+    .btn-add-row { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--accent2); background: none; border: 1px dashed var(--accent2); border-radius: 5px; padding: 6px 14px; cursor: pointer; transition: background 0.12s; font-family: inherit; }
+    .btn-add-row:hover { background: rgba(26,86,219,0.07); }
+    .camp-editor-actions { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+    .btn-save-camp { font-size: 12px; font-weight: 700; color: #fff; background: var(--accent2); border: none; border-radius: 5px; padding: 7px 18px; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
+    .btn-save-camp:hover { opacity: 0.88; }
+    .btn-cancel-camp { font-size: 12px; font-weight: 600; color: var(--ink-mid); background: none; border: 1px solid var(--border); border-radius: 5px; padding: 6px 14px; cursor: pointer; font-family: inherit; }
+    .btn-cancel-camp:hover { background: var(--surface2); }
+    .btn-edit-camp { font-size: 11px; font-weight: 600; color: var(--accent2); background: none; border: 1px solid var(--accent2); border-radius: 4px; padding: 3px 10px; cursor: pointer; font-family: inherit; opacity: 0.7; transition: opacity 0.15s; }
+    .btn-edit-camp:hover { opacity: 1; }
+    .camp-manual-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent2); background: rgba(26,86,219,0.1); padding: 2px 7px; border-radius: 4px; margin-left: 8px; }
+
     .marketplace-tabs {
       display: flex;
       gap: 6px;
@@ -312,7 +341,11 @@
 
 
     <div class="section">
-      <div class="section-header"><div class="section-title">Top campañas por inversión</div><div class="section-line"></div></div>
+      <div class="section-header">
+        <div class="section-title">Top campañas por inversión</div>
+        <div class="section-line"></div>
+        <button class="btn-edit-camp" id="btnEditCamp" onclick="abrirEditorCampanas()" style="display:none;">&#9998; Editar</button>
+      </div>
       <div class="chart-card">
         <div id="chartCampanas"></div>
       </div>
@@ -521,14 +554,21 @@
       const marketplaces = [...new Set(mktRows.map(function(r) { return r.marketplace; }).filter(function(m) { return m && m !== ''; }))].sort();
       renderMarketplaceTabs(marketplaces, currentMarketplace);
 
-      render(productos, campanas, mes);
+      // Si Supabase no tiene campañas, cargar datos manuales de localStorage
+      var campañasFinales = campanas;
+      if (!campanas.length) {
+        var manual = loadManualCampanas(mes);
+        if (manual.length) campañasFinales = manual;
+      }
+
+      render(productos, campañasFinales, mes, campanas.length === 0);
     } catch(e) {
       document.getElementById('loadingState').innerHTML = `<p style="color:var(--negative);">${e.message}</p>`;
     }
   }
 
 
-  function render(productos,campanas,mes) {
+  function render(productos,campanas,mes,modoManual) {
     document.getElementById('headerClientName').textContent=CONFIG.clienteNombre;
     document.getElementById('headerPeriod').textContent=fmtMes(mes) + (currentMarketplace ? ' · ' + currentMarketplace : '');
     document.title=`${CONFIG.clienteNombre} — Grow Studio`;
@@ -662,7 +702,7 @@
     }).join(''):'<tr><td colspan="6" class="no-data">Sin datos de productos.</td></tr>';
     attachEditHandlers();
 
-    renderCampanas(campanas);
+    renderCampanas(campanas, mes, modoManual);
 
     document.getElementById('loadingState').style.display='none';
     document.getElementById('content').style.display='block';
@@ -674,14 +714,159 @@
       return (nombre||'—').replace(/\s*-\s*\[\d{2}\/\d{2}\]\s*$/,'').trim();
     }
 
-    function renderCampanas(campanas) {
+    // ── Datos manuales de campañas (localStorage) ─────────────────────
+    function _campKey(mes) { return 'gs_campanas_manual_' + CONFIG.clienteId + '_' + mes; }
+    function loadManualCampanas(mes) {
+      try { return JSON.parse(localStorage.getItem(_campKey(mes)) || '[]'); } catch(e) { return []; }
+    }
+    function saveManualCampanas(mes, rows) {
+      try { localStorage.setItem(_campKey(mes), JSON.stringify(rows)); } catch(e) {}
+    }
+
+    // Estado del editor
+    var _editorMes = null;
+    var _editorModoManual = false;
+
+    function abrirEditorCampanas() {
+      var el = document.getElementById('chartCampanas');
+      if (!el) return;
+      var rows = loadManualCampanas(_editorMes);
+      renderEditorCampanas(el, rows, _editorMes);
+    }
+
+    function renderEditorCampanas(el, rows, mes) {
+      if (!rows.length) rows = [{ campana_nombre: '', gasto: '', ventas: '' }];
+
+      function filaHTML(r, i) {
+        var inv = r.gasto !== '' ? parseFloat(r.gasto) : NaN;
+        var ven = r.ventas !== '' ? parseFloat(r.ventas) : NaN;
+        var roas = (!isNaN(inv) && inv > 0 && !isNaN(ven)) ? fmt(ven / inv, 2) + 'x' : '—';
+        var acos = (!isNaN(inv) && !isNaN(ven) && ven > 0) ? fmt((inv / ven) * 100, 1) + '%' : '—';
+        return '<tr data-idx="' + i + '">' +
+          '<td><input type="text" class="camp-inp-nombre" value="' + (r.campana_nombre||'').replace(/"/g,'&quot;') + '" placeholder="Nombre campaña" /></td>' +
+          '<td><input type="number" class="camp-inp-gasto" value="' + (r.gasto !== '' ? r.gasto : '') + '" placeholder="0.00" min="0" step="0.01" /></td>' +
+          '<td><input type="number" class="camp-inp-ventas" value="' + (r.ventas !== '' ? r.ventas : '') + '" placeholder="0.00" min="0" step="0.01" /></td>' +
+          '<td class="td-calc camp-roas">' + roas + '</td>' +
+          '<td class="td-calc camp-acos">' + acos + '</td>' +
+          '<td class="td-del"><button class="btn-del-row" data-del="' + i + '" title="Eliminar fila">&#10005;</button></td>' +
+        '</tr>';
+      }
+
+      el.innerHTML =
+        '<div class="camp-editor-wrap">' +
+          '<div class="camp-editor-header">' +
+            '<span class="camp-editor-badge">&#9998; Modo edición manual</span>' +
+          '</div>' +
+          '<table class="camp-editor-table">' +
+            '<thead><tr>' +
+              '<th style="min-width:200px;">Nombre campaña</th>' +
+              '<th style="width:120px;">Inversión (€)</th>' +
+              '<th style="width:120px;">Ventas PPC (€)</th>' +
+              '<th style="width:70px;text-align:right;">ROAS</th>' +
+              '<th style="width:70px;text-align:right;">ACoS</th>' +
+              '<th style="width:32px;"></th>' +
+            '</tr></thead>' +
+            '<tbody id="campEditorBody">' +
+              rows.map(filaHTML).join('') +
+            '</tbody>' +
+          '</table>' +
+          '<div class="camp-editor-actions">' +
+            '<button class="btn-add-row" id="btnAddCampRow">+ Añadir campaña</button>' +
+            '<button class="btn-save-camp" id="btnSaveCamp">Guardar</button>' +
+            '<button class="btn-cancel-camp" id="btnCancelCamp">Cancelar</button>' +
+          '</div>' +
+        '</div>';
+
+      // Recalcular ROAS/ACoS en tiempo real
+      function recalcFila(tr) {
+        var inv = parseFloat(tr.querySelector('.camp-inp-gasto').value) || 0;
+        var ven = parseFloat(tr.querySelector('.camp-inp-ventas').value) || 0;
+        tr.querySelector('.camp-roas').textContent = (inv > 0 && ven >= 0) ? fmt(ven / inv, 2) + 'x' : '—';
+        tr.querySelector('.camp-acos').textContent = (ven > 0 && inv >= 0) ? fmt((inv / ven) * 100, 1) + '%' : '—';
+      }
+      el.querySelectorAll('.camp-inp-gasto, .camp-inp-ventas').forEach(function(inp) {
+        inp.addEventListener('input', function() { recalcFila(this.closest('tr')); });
+      });
+
+      // Eliminar fila
+      el.addEventListener('click', function(e) {
+        var btn = e.target.closest('[data-del]');
+        if (!btn) return;
+        var idx = parseInt(btn.dataset.del);
+        var currentRows = leerFilasEditor(el);
+        currentRows.splice(idx, 1);
+        renderEditorCampanas(el, currentRows, mes);
+      });
+
+      // Añadir fila
+      document.getElementById('btnAddCampRow').addEventListener('click', function() {
+        var tbody = document.getElementById('campEditorBody');
+        var idx = tbody.querySelectorAll('tr').length;
+        var tr = document.createElement('tr');
+        tr.dataset.idx = idx;
+        tr.innerHTML = filaHTML({ campana_nombre: '', gasto: '', ventas: '' }, idx).replace(/^<tr[^>]*>/, '').replace(/<\/tr>$/, '');
+        tbody.appendChild(tr);
+        tr.querySelectorAll('.camp-inp-gasto, .camp-inp-ventas').forEach(function(inp) {
+          inp.addEventListener('input', function() { recalcFila(this.closest('tr')); });
+        });
+        tr.querySelector('[data-del]').addEventListener('click', function() {
+          var c = leerFilasEditor(el);
+          c.splice(parseInt(this.dataset.del), 1);
+          renderEditorCampanas(el, c, mes);
+        });
+        tr.querySelector('.camp-inp-nombre').focus();
+      });
+
+      // Guardar
+      document.getElementById('btnSaveCamp').addEventListener('click', function() {
+        var rows = leerFilasEditor(el).filter(function(r) { return r.campana_nombre.trim() || r.gasto !== ''; });
+        saveManualCampanas(mes, rows);
+        loadMes(mes, currentMarketplace);
+      });
+
+      // Cancelar
+      document.getElementById('btnCancelCamp').addEventListener('click', function() {
+        loadMes(mes, currentMarketplace);
+      });
+    }
+
+    function leerFilasEditor(el) {
+      var rows = [];
+      el.querySelectorAll('#campEditorBody tr').forEach(function(tr) {
+        rows.push({
+          campana_nombre: tr.querySelector('.camp-inp-nombre').value.trim(),
+          gasto: parseFloat(tr.querySelector('.camp-inp-gasto').value) || 0,
+          ventas: parseFloat(tr.querySelector('.camp-inp-ventas').value) || 0
+        });
+      });
+      return rows;
+    }
+
+    function renderCampanas(campanas, mes, modoManual) {
+      _editorMes = mes;
+      _editorModoManual = !!modoManual;
+
+      // Mostrar/ocultar botón editar
+      var btnEdit = document.getElementById('btnEditCamp');
+      if (btnEdit) btnEdit.style.display = 'inline-block';
+
       const el = document.getElementById('chartCampanas');
       if (!el) return;
+
+      // Sin datos (ni Supabase ni manual): abrir editor vacío directamente
+      if (!campanas.length) {
+        renderEditorCampanas(el, [], mes);
+        if (btnEdit) btnEdit.style.display = 'none';
+        return;
+      }
+
+      // Con datos: mostrar hbar (con badge "Manual" si son datos manuales)
       const top10 = campanas.slice(0, 10);
-      if (!top10.length) { el.innerHTML='<p class="no-data">Sin datos de campañas.</p>'; return; }
       const maxInv = Math.max(...top10.map(c => c.gasto||0), 1);
       const maxVen = Math.max(...top10.map(c => c.ventas||0), 1);
+      var manualBadge = modoManual ? '<span class="camp-manual-badge">Manual</span>' : '';
       el.innerHTML =
+        (modoManual ? '<div style="margin-bottom:10px;">' + manualBadge + '</div>' : '') +
         '<div class="hbar-legend">' +
           '<div class="hbar-legend-item"><div class="hbar-legend-dot" style="background:#1A56DB;"></div>Inversión</div>' +
           '<div class="hbar-legend-item"><div class="hbar-legend-dot" style="background:#16A34A;"></div>Ventas PPC</div>' +
