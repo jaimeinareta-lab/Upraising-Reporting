@@ -171,34 +171,31 @@
       font-weight: 600;
     }
 
-    /* EDITOR MANUAL DE CAMPAÑAS */
-    .camp-editor-wrap { border: 1px dashed var(--accent2); border-radius: var(--radius); padding: 16px; background: rgba(26,86,219,0.03); }
-    .camp-editor-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .camp-editor-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent2); background: rgba(26,86,219,0.1); padding: 2px 8px; border-radius: 4px; }
-    .camp-editor-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-    .camp-editor-table th { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-light); padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
-    .camp-editor-table td { padding: 6px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    .camp-editor-table tr:last-child td { border-bottom: none; }
-    .camp-editor-table input[type=text], .camp-editor-table input[type=number] {
-      width: 100%; font-size: 13px; font-family: inherit; border: 1px solid var(--border);
-      border-radius: 4px; padding: 5px 8px; background: var(--surface); color: var(--ink);
-      outline: none; transition: border-color 0.15s;
-    }
-    .camp-editor-table input:focus { border-color: var(--accent2); box-shadow: 0 0 0 2px rgba(26,86,219,0.12); }
-    .camp-editor-table .td-calc { font-size: 12px; font-weight: 600; text-align: right; padding-right: 10px; font-variant-numeric: tabular-nums; }
-    .camp-editor-table .td-del { width: 32px; text-align: center; }
-    .btn-del-row { background: none; border: none; cursor: pointer; color: var(--ink-light); font-size: 16px; line-height: 1; padding: 2px 4px; border-radius: 3px; transition: color 0.1s, background 0.1s; }
-    .btn-del-row:hover { color: var(--negative); background: rgba(220,38,38,0.08); }
-    .btn-add-row { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--accent2); background: none; border: 1px dashed var(--accent2); border-radius: 5px; padding: 6px 14px; cursor: pointer; transition: background 0.12s; font-family: inherit; }
-    .btn-add-row:hover { background: rgba(26,86,219,0.07); }
-    .camp-editor-actions { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
-    .btn-save-camp { font-size: 12px; font-weight: 700; color: #fff; background: var(--accent2); border: none; border-radius: 5px; padding: 7px 18px; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
-    .btn-save-camp:hover { opacity: 0.88; }
-    .btn-cancel-camp { font-size: 12px; font-weight: 600; color: var(--ink-mid); background: none; border: 1px solid var(--border); border-radius: 5px; padding: 6px 14px; cursor: pointer; font-family: inherit; }
-    .btn-cancel-camp:hover { background: var(--surface2); }
-    .btn-edit-camp { font-size: 11px; font-weight: 600; color: var(--accent2); background: none; border: 1px solid var(--accent2); border-radius: 4px; padding: 3px 10px; cursor: pointer; font-family: inherit; opacity: 0.7; transition: opacity 0.15s; }
-    .btn-edit-camp:hover { opacity: 1; }
-    .camp-manual-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent2); background: rgba(26,86,219,0.1); padding: 2px 7px; border-radius: 4px; margin-left: 8px; }
+    /* TABLA DE CAMPAÑAS EDITABLE */
+    .camp-table { width: 100%; border-collapse: collapse; }
+    .camp-table th { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-light); padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    .camp-table th.th-num { text-align: right; }
+    .camp-table td { padding: 0; border-bottom: 1px solid var(--border); vertical-align: middle; position: relative; }
+    .camp-table tr:last-child td { border-bottom: none; }
+    .camp-table tr:hover td { background: var(--surface2); }
+    .camp-td-inner { padding: 10px 12px; font-size: 13px; color: var(--ink); display: block; min-height: 38px; line-height: 1.4; }
+    .camp-td-inner.num { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .camp-td-inner.calc { text-align: right; font-weight: 600; color: var(--ink-mid); font-variant-numeric: tabular-nums; }
+    .camp-td-inner.editable { cursor: text; }
+    .camp-td-inner.editable:hover { background: rgba(26,86,219,0.06); border-radius: 4px; }
+    .camp-td-inner.editable::after { content: '✎'; font-size: 9px; color: var(--accent2); opacity: 0; margin-left: 6px; transition: opacity 0.15s; vertical-align: middle; }
+    .camp-table tr:hover .camp-td-inner.editable::after { opacity: 0.6; }
+    .camp-td-inner input { width: 100%; font-size: 13px; font-family: inherit; border: none; outline: none; background: transparent; color: var(--ink); padding: 0; font-variant-numeric: tabular-nums; }
+    .camp-td-inner.editing { background: rgba(26,86,219,0.07); border-radius: 4px; box-shadow: inset 0 0 0 1.5px var(--accent2); }
+    .camp-td-del { width: 28px; padding: 0 !important; }
+    .btn-del-row { display: none; background: none; border: none; cursor: pointer; color: var(--ink-light); font-size: 14px; padding: 10px 6px; width: 100%; transition: color 0.1s; }
+    .camp-table tr:hover .btn-del-row { display: block; }
+    .btn-del-row:hover { color: var(--negative); }
+    .camp-add-row { display: flex; align-items: center; gap: 6px; width: 100%; margin-top: 10px; padding: 7px 10px; font-size: 12px; font-weight: 600; color: var(--ink-light); background: none; border: 1px dashed var(--border); border-radius: 5px; cursor: pointer; font-family: inherit; transition: color 0.12s, border-color 0.12s; }
+    .camp-add-row:hover { color: var(--accent2); border-color: var(--accent2); }
+    .camp-manual-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent2); background: rgba(26,86,219,0.1); padding: 2px 7px; border-radius: 4px; }
+    .btn-edit-camp { font-size: 11px; font-weight: 600; color: var(--ink-light); background: none; border: 1px solid var(--border); border-radius: 4px; padding: 3px 10px; cursor: pointer; font-family: inherit; transition: color 0.15s, border-color 0.15s; }
+    .btn-edit-camp:hover { color: var(--accent2); border-color: var(--accent2); }
 
     .marketplace-tabs {
       display: flex;
@@ -723,160 +720,176 @@
       try { localStorage.setItem(_campKey(mes), JSON.stringify(rows)); } catch(e) {}
     }
 
-    // Estado del editor
     var _editorMes = null;
-    var _editorModoManual = false;
 
     function abrirEditorCampanas() {
-      var el = document.getElementById('chartCampanas');
-      if (!el) return;
       var rows = loadManualCampanas(_editorMes);
-      renderEditorCampanas(el, rows, _editorMes);
+      renderTablaCampanas(document.getElementById('chartCampanas'), rows, _editorMes, true);
     }
 
-    function renderEditorCampanas(el, rows, mes) {
-      if (!rows.length) rows = [{ campana_nombre: '', gasto: '', ventas: '' }];
+    // Recalcula ROAS y ACoS de una fila dado inversión y ventas
+    function calcRoasAcos(inv, ven) {
+      return {
+        roas: (inv > 0) ? fmt(ven / inv, 2) + 'x' : '—',
+        acos: (ven > 0) ? fmt((inv / ven) * 100, 1) + '%' : '—'
+      };
+    }
 
-      function filaHTML(r, i) {
-        var inv = r.gasto !== '' ? parseFloat(r.gasto) : NaN;
-        var ven = r.ventas !== '' ? parseFloat(r.ventas) : NaN;
-        var roas = (!isNaN(inv) && inv > 0 && !isNaN(ven)) ? fmt(ven / inv, 2) + 'x' : '—';
-        var acos = (!isNaN(inv) && !isNaN(ven) && ven > 0) ? fmt((inv / ven) * 100, 1) + '%' : '—';
-        return '<tr data-idx="' + i + '">' +
-          '<td><input type="text" class="camp-inp-nombre" value="' + (r.campana_nombre||'').replace(/"/g,'&quot;') + '" placeholder="Nombre campaña" /></td>' +
-          '<td><input type="number" class="camp-inp-gasto" value="' + (r.gasto !== '' ? r.gasto : '') + '" placeholder="0.00" min="0" step="0.01" /></td>' +
-          '<td><input type="number" class="camp-inp-ventas" value="' + (r.ventas !== '' ? r.ventas : '') + '" placeholder="0.00" min="0" step="0.01" /></td>' +
-          '<td class="td-calc camp-roas">' + roas + '</td>' +
-          '<td class="td-calc camp-acos">' + acos + '</td>' +
-          '<td class="td-del"><button class="btn-del-row" data-del="' + i + '" title="Eliminar fila">&#10005;</button></td>' +
-        '</tr>';
+    // Activa edición inline en una celda
+    function activarCeldaEditable(td) {
+      var inner = td.querySelector('.camp-td-inner');
+      if (!inner || inner.classList.contains('editing')) return;
+      var tr = td.closest('tr');
+      var tipo = td.dataset.tipo; // 'nombre' | 'gasto' | 'ventas'
+      var valorActual = inner.dataset.val !== undefined ? inner.dataset.val : inner.textContent.trim();
+      inner.classList.add('editing');
+      inner.innerHTML = '';
+      var input = document.createElement('input');
+      input.type = tipo === 'nombre' ? 'text' : 'number';
+      if (tipo !== 'nombre') { input.min = '0'; input.step = '0.01'; }
+      input.value = tipo === 'nombre' ? valorActual : (parseFloat(valorActual) || '');
+      input.placeholder = tipo === 'nombre' ? 'Nombre campaña' : '0.00';
+      inner.appendChild(input);
+      input.focus();
+      if (tipo !== 'nombre') input.select();
+
+      function guardar() {
+        var nuevo = tipo === 'nombre' ? input.value.trim() : (parseFloat(input.value) || 0);
+        inner.classList.remove('editing');
+        inner.dataset.val = nuevo;
+        inner.innerHTML = tipo === 'nombre' ? (nuevo || '<span style="color:var(--ink-light);font-style:italic;">Sin nombre</span>') : fmtEur(nuevo);
+        reattachDblClick(td);
+        // Recalcular ROAS/ACoS de esta fila
+        var inv = parseFloat(tr.querySelector('[data-tipo="gasto"] .camp-td-inner').dataset.val) || 0;
+        var ven = parseFloat(tr.querySelector('[data-tipo="ventas"] .camp-td-inner').dataset.val) || 0;
+        var c = calcRoasAcos(inv, ven);
+        tr.querySelector('.td-roas').textContent = c.roas;
+        tr.querySelector('.td-acos').textContent = c.acos;
+        // Auto-guardar
+        persistirCampanas(tr.closest('table'));
       }
 
-      el.innerHTML =
-        '<div class="camp-editor-wrap">' +
-          '<div class="camp-editor-header">' +
-            '<span class="camp-editor-badge">&#9998; Modo edición manual</span>' +
-          '</div>' +
-          '<table class="camp-editor-table">' +
-            '<thead><tr>' +
-              '<th style="min-width:200px;">Nombre campaña</th>' +
-              '<th style="width:120px;">Inversión (€)</th>' +
-              '<th style="width:120px;">Ventas PPC (€)</th>' +
-              '<th style="width:70px;text-align:right;">ROAS</th>' +
-              '<th style="width:70px;text-align:right;">ACoS</th>' +
-              '<th style="width:32px;"></th>' +
-            '</tr></thead>' +
-            '<tbody id="campEditorBody">' +
-              rows.map(filaHTML).join('') +
-            '</tbody>' +
-          '</table>' +
-          '<div class="camp-editor-actions">' +
-            '<button class="btn-add-row" id="btnAddCampRow">+ Añadir campaña</button>' +
-            '<button class="btn-save-camp" id="btnSaveCamp">Guardar</button>' +
-            '<button class="btn-cancel-camp" id="btnCancelCamp">Cancelar</button>' +
-          '</div>' +
-        '</div>';
-
-      // Recalcular ROAS/ACoS en tiempo real
-      function recalcFila(tr) {
-        var inv = parseFloat(tr.querySelector('.camp-inp-gasto').value) || 0;
-        var ven = parseFloat(tr.querySelector('.camp-inp-ventas').value) || 0;
-        tr.querySelector('.camp-roas').textContent = (inv > 0 && ven >= 0) ? fmt(ven / inv, 2) + 'x' : '—';
-        tr.querySelector('.camp-acos').textContent = (ven > 0 && inv >= 0) ? fmt((inv / ven) * 100, 1) + '%' : '—';
-      }
-      el.querySelectorAll('.camp-inp-gasto, .camp-inp-ventas').forEach(function(inp) {
-        inp.addEventListener('input', function() { recalcFila(this.closest('tr')); });
-      });
-
-      // Eliminar fila
-      el.addEventListener('click', function(e) {
-        var btn = e.target.closest('[data-del]');
-        if (!btn) return;
-        var idx = parseInt(btn.dataset.del);
-        var currentRows = leerFilasEditor(el);
-        currentRows.splice(idx, 1);
-        renderEditorCampanas(el, currentRows, mes);
-      });
-
-      // Añadir fila
-      document.getElementById('btnAddCampRow').addEventListener('click', function() {
-        var tbody = document.getElementById('campEditorBody');
-        var idx = tbody.querySelectorAll('tr').length;
-        var tr = document.createElement('tr');
-        tr.dataset.idx = idx;
-        tr.innerHTML = filaHTML({ campana_nombre: '', gasto: '', ventas: '' }, idx).replace(/^<tr[^>]*>/, '').replace(/<\/tr>$/, '');
-        tbody.appendChild(tr);
-        tr.querySelectorAll('.camp-inp-gasto, .camp-inp-ventas').forEach(function(inp) {
-          inp.addEventListener('input', function() { recalcFila(this.closest('tr')); });
-        });
-        tr.querySelector('[data-del]').addEventListener('click', function() {
-          var c = leerFilasEditor(el);
-          c.splice(parseInt(this.dataset.del), 1);
-          renderEditorCampanas(el, c, mes);
-        });
-        tr.querySelector('.camp-inp-nombre').focus();
-      });
-
-      // Guardar
-      document.getElementById('btnSaveCamp').addEventListener('click', function() {
-        var rows = leerFilasEditor(el).filter(function(r) { return r.campana_nombre.trim() || r.gasto !== ''; });
-        saveManualCampanas(mes, rows);
-        loadMes(mes, currentMarketplace);
-      });
-
-      // Cancelar
-      document.getElementById('btnCancelCamp').addEventListener('click', function() {
-        loadMes(mes, currentMarketplace);
+      input.addEventListener('blur', guardar);
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+        if (e.key === 'Escape') {
+          inner.classList.remove('editing');
+          inner.dataset.val = valorActual;
+          inner.innerHTML = tipo === 'nombre' ? (valorActual || '') : fmtEur(parseFloat(valorActual) || 0);
+          reattachDblClick(td);
+        }
       });
     }
 
-    function leerFilasEditor(el) {
+    function reattachDblClick(td) {
+      td.ondblclick = function(e) { e.preventDefault(); activarCeldaEditable(this); };
+    }
+
+    function persistirCampanas(table) {
       var rows = [];
-      el.querySelectorAll('#campEditorBody tr').forEach(function(tr) {
-        rows.push({
-          campana_nombre: tr.querySelector('.camp-inp-nombre').value.trim(),
-          gasto: parseFloat(tr.querySelector('.camp-inp-gasto').value) || 0,
-          ventas: parseFloat(tr.querySelector('.camp-inp-ventas').value) || 0
-        });
+      table.querySelectorAll('tbody tr').forEach(function(tr) {
+        var nombre = (tr.querySelector('[data-tipo="nombre"] .camp-td-inner').dataset.val || '').trim();
+        var gasto  = parseFloat(tr.querySelector('[data-tipo="gasto"]  .camp-td-inner').dataset.val) || 0;
+        var ventas = parseFloat(tr.querySelector('[data-tipo="ventas"] .camp-td-inner').dataset.val) || 0;
+        if (nombre || gasto || ventas) rows.push({ campana_nombre: nombre, gasto: gasto, ventas: ventas });
       });
-      return rows;
+      saveManualCampanas(_editorMes, rows);
+    }
+
+    function crearFilaCamp(r, mes) {
+      var inv = parseFloat(r.gasto) || 0;
+      var ven = parseFloat(r.ventas) || 0;
+      var c = calcRoasAcos(inv, ven);
+      var nombre = r.campana_nombre || '';
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td data-tipo="nombre"><div class="camp-td-inner editable" data-val="' + nombre.replace(/"/g,'&quot;') + '">' + (nombre || '') + '</div></td>' +
+        '<td data-tipo="gasto"><div class="camp-td-inner editable num" data-val="' + inv + '">' + fmtEur(inv) + '</div></td>' +
+        '<td data-tipo="ventas"><div class="camp-td-inner editable num" data-val="' + ven + '">' + fmtEur(ven) + '</div></td>' +
+        '<td><div class="camp-td-inner calc td-roas">' + c.roas + '</div></td>' +
+        '<td><div class="camp-td-inner calc td-acos">' + c.acos + '</div></td>' +
+        '<td class="camp-td-del"><button class="btn-del-row" title="Eliminar">&#10005;</button></td>';
+
+      tr.querySelectorAll('[data-tipo]').forEach(function(td) {
+        td.ondblclick = function(e) { e.preventDefault(); activarCeldaEditable(this); };
+      });
+      tr.querySelector('.btn-del-row').onclick = function() {
+        tr.remove();
+        persistirCampanas(tr.closest('table') || document.querySelector('.camp-table'));
+        // Recargar para refrescar carteras
+        loadMes(_editorMes, currentMarketplace);
+      };
+      return tr;
+    }
+
+    function renderTablaCampanas(el, rows, mes, focusPrimero) {
+      if (!rows.length) rows = [{ campana_nombre: '', gasto: 0, ventas: 0 }];
+
+      var table = document.createElement('table');
+      table.className = 'camp-table';
+      table.innerHTML =
+        '<thead><tr>' +
+          '<th>Campaña <span class="camp-manual-badge">Manual · doble clic para editar</span></th>' +
+          '<th class="th-num">Inversión</th>' +
+          '<th class="th-num">Ventas PPC</th>' +
+          '<th class="th-num">ROAS</th>' +
+          '<th class="th-num">ACoS</th>' +
+          '<th></th>' +
+        '</tr></thead>' +
+        '<tbody></tbody>';
+
+      var tbody = table.querySelector('tbody');
+      rows.forEach(function(r) { tbody.appendChild(crearFilaCamp(r, mes)); });
+
+      var addBtn = document.createElement('button');
+      addBtn.className = 'camp-add-row';
+      addBtn.textContent = '+ Añadir campaña';
+      addBtn.onclick = function() {
+        var tr = crearFilaCamp({ campana_nombre: '', gasto: 0, ventas: 0 }, mes);
+        tbody.appendChild(tr);
+        tr.querySelector('[data-tipo="nombre"] .camp-td-inner').ondblclick.call(tr.querySelector('[data-tipo="nombre"]'));
+        activarCeldaEditable(tr.querySelector('[data-tipo="nombre"]'));
+      };
+
+      el.innerHTML = '';
+      el.appendChild(table);
+      el.appendChild(addBtn);
+
+      if (focusPrimero) {
+        var primera = tbody.querySelector('[data-tipo="nombre"]');
+        if (primera) activarCeldaEditable(primera);
+      }
     }
 
     function renderCampanas(campanas, mes, modoManual) {
       _editorMes = mes;
-      _editorModoManual = !!modoManual;
-
-      // Mostrar/ocultar botón editar
       var btnEdit = document.getElementById('btnEditCamp');
-      if (btnEdit) btnEdit.style.display = 'inline-block';
-
-      const el = document.getElementById('chartCampanas');
+      var el = document.getElementById('chartCampanas');
       if (!el) return;
 
-      // Sin datos (ni Supabase ni manual): abrir editor vacío directamente
-      if (!campanas.length) {
-        renderEditorCampanas(el, [], mes);
+      if (modoManual) {
+        // Sin datos de API: mostrar tabla editable directamente
         if (btnEdit) btnEdit.style.display = 'none';
+        renderTablaCampanas(el, campanas, mes, !campanas.length);
         return;
       }
 
-      // Con datos: mostrar hbar (con badge "Manual" si son datos manuales)
-      const top10 = campanas.slice(0, 10);
-      const maxInv = Math.max(...top10.map(c => c.gasto||0), 1);
-      const maxVen = Math.max(...top10.map(c => c.ventas||0), 1);
-      var manualBadge = modoManual ? '<span class="camp-manual-badge">Manual</span>' : '';
+      // Datos de Supabase: hbar normal + botón "✎ Editar" discreto
+      if (btnEdit) btnEdit.style.display = 'inline-block';
+      var top10 = campanas.slice(0, 10);
+      var maxInv = Math.max.apply(null, top10.map(function(c){ return c.gasto||0; }).concat([1]));
+      var maxVen = Math.max.apply(null, top10.map(function(c){ return c.ventas||0; }).concat([1]));
       el.innerHTML =
-        (modoManual ? '<div style="margin-bottom:10px;">' + manualBadge + '</div>' : '') +
         '<div class="hbar-legend">' +
           '<div class="hbar-legend-item"><div class="hbar-legend-dot" style="background:#1A56DB;"></div>Inversión</div>' +
           '<div class="hbar-legend-item"><div class="hbar-legend-dot" style="background:#16A34A;"></div>Ventas PPC</div>' +
         '</div>' +
         '<div class="hbar-wrap" style="margin-top:12px;">' +
-        top10.map(c => {
-          const nombre = stripFecha(c.campana_nombre);
-          const invPct = Math.max(Math.round(((c.gasto||0)/maxInv)*100), 1);
-          const venPct = Math.max(Math.round(((c.ventas||0)/maxVen)*100), 1);
-          const roas = c.gasto > 0 ? fmt(c.ventas/c.gasto,2)+'x' : '—';
+        top10.map(function(c) {
+          var nombre = stripFecha(c.campana_nombre);
+          var invPct = Math.max(Math.round(((c.gasto||0)/maxInv)*100), 1);
+          var venPct = Math.max(Math.round(((c.ventas||0)/maxVen)*100), 1);
+          var roas = c.gasto > 0 ? fmt(c.ventas/c.gasto,2)+'x' : '—';
           return '<div class="hbar-row">' +
             '<div class="hbar-label" title="'+nombre+'">'+nombre+'</div>' +
             '<div style="flex:1;display:flex;flex-direction:column;gap:3px;">' +
