@@ -537,6 +537,11 @@
     });
   }
 
+  function mktToPais(mkt) {
+    const m = (mkt || '').match(/AMAZON[_.]?([A-Z]{2,3})/i);
+    return m ? m[1].toUpperCase() : null;
+  }
+
   async function loadMes(mes, marketplace) {
     currentMes = mes;
     currentMarketplace = marketplace || null;
@@ -546,9 +551,13 @@
       const prodParams = {select:'*', cliente_id:`eq.${CONFIG.clienteId}`, mes:`eq.${mes}`, order:'ventas_totales.desc'};
       if (currentMarketplace) prodParams.marketplace = `eq.${currentMarketplace}`;
 
+      const campParams = {select:'*', cliente_id:`eq.${CONFIG.clienteId}`, mes:`eq.${mes}`, order:'gasto.desc'};
+      const paisFiltro = mktToPais(currentMarketplace);
+      if (paisFiltro) campParams.pais = `eq.${paisFiltro}`;
+
       const [productos, campanas, mktRows] = await Promise.all([
         sbFetch('productos', prodParams),
-        sbFetch('campanas',  {select:'*', cliente_id:`eq.${CONFIG.clienteId}`, mes:`eq.${mes}`, order:'gasto.desc'}),
+        sbFetch('campanas',  campParams),
         sbFetch('productos', {select:'marketplace', cliente_id:`eq.${CONFIG.clienteId}`, mes:`eq.${mes}`}),
       ]);
 
