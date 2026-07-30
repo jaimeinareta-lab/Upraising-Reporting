@@ -276,6 +276,11 @@
           <div class="kpi-value" id="kpiTacos">—</div>
           <div class="kpi-sub">gasto ads / ventas totales</div>
         </div>
+        <div class="kpi-card" id="kpiRoasCard">
+          <div class="kpi-label">ROAS</div>
+          <div class="kpi-value" id="kpiRoas">—</div>
+          <div class="kpi-sub">ventas ads / gasto ads</div>
+        </div>
       </div>
     </div>
 
@@ -538,8 +543,11 @@
   }
 
   function mktToPais(mkt) {
-    const m = (mkt || '').match(/AMAZON[_.]?([A-Z]{2,3})/i);
-    return m ? m[1].toUpperCase() : null;
+    if (!mkt) return null;
+    const partes = mkt.toUpperCase().split(/[^A-Z]+/).filter(function(p) { return p && p !== 'AMAZON' && p !== 'CO'; });
+    if (!partes.length) return null;
+    const ultima = partes[partes.length - 1];
+    return ultima === 'COM' ? 'US' : ultima;
   }
 
   async function loadMes(mes, marketplace) {
@@ -628,6 +636,11 @@
     document.getElementById('kpiTacos').textContent=`${fmt(tacos,1)}%`;
     document.getElementById('kpiTacos').className='kpi-value '+(tacos<=15?'positive':tacos<=25?'':'negative');
     document.getElementById('kpiTacosCard').className='kpi-card '+(tacos<=15?'positive':tacos<=25?'':'negative');
+
+    const roasGlobal=adsSpend>0?(ventasPPCcamp/adsSpend):0;
+    document.getElementById('kpiRoas').textContent=adsSpend>0?`${fmt(roasGlobal,2)}x`:'—';
+    document.getElementById('kpiRoas').className='kpi-value '+(roasGlobal>=3?'positive':roasGlobal>=2?'':'negative');
+    document.getElementById('kpiRoasCard').className='kpi-card '+(roasGlobal>=3?'positive':roasGlobal>=2?'':'negative');
 
     document.getElementById('donutOrg').textContent=`${fmt(pctOrg,1)}%`;
     document.getElementById('donutOrgEur').textContent=fmtEur(ventasOrg);
